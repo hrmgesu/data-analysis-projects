@@ -5,3 +5,7 @@
 # Code your solution to exercises 3 and 4 here:
 
 # Code your solution to exercise 5 here
+name = input("Enter your name: ")
+
+# Print a greeting
+print("Hello,", name, "! Welcome to Python programming.")

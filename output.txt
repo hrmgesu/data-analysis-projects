@@ -1,0 +1,2821 @@
+diff --git a/9-to-5.ipynb b/9-to-5.ipynb
+deleted file mode 100644
+index 13e699f..0000000
+--- a/9-to-5.ipynb
++++ /dev/null
+@@ -1,645 +0,0 @@
+-{
+-    "cells": [
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "7ad962b3-fce2-439c-9ac4-460e1a79b0e8"
+-            },
+-            "source": [
+-                "# Graded Assignment 3: 9 to 5\n",
+-                "\n",
+-                "Time to show off your SQL skills! For each question, copy the SQL query you used and make note of the answer.\n",
+-                "\n",
+-                "## The Dataset\n",
+-                "\n",
+-                "For this assignment, you will be using the Bureau of Labor Statistics (BLS) Current Employment Survey (CES) results which can be found on [Kaggle](https://www.kaggle.com/datasets/bls/employment).\n",
+-                "\n",
+-                "## Business Issue\n",
+-                "\n",
+-                "You are working for the Bureau of Labor Statistics with the United States government and have been approached by your boss with an important meeting request. You have been asked by your supervisor to meet with Dolly Parton whose nonprofit is looking to shed light on the state of employment in the United States. As part of the 9 to 5 project, their research is focused on production and nonsupervisory employees and how those employees fare compared to all employees in the United States. While the data the BLS collects from the CES is publicly available, Dolly Parton and her colleagues need your assistance navigating the thousands of rows in each table in LaborStatisticsDB.\n",
+-                "\n",
+-                "## About the Dataset\n",
+-                "\n",
+-                "This dataset comes directly from the Bureau of Labor Statistics’ Current Employment Survey (CES). Here are some things you need to know:\n",
+-                "\n",
+-                "1. The industry table contains an NAICS code. This is different from the industry code. NAICS stands for North American Industry Classification System.\n",
+-                "1. Series ID is composed of multiple different codes. CES stands for Current Employment Survey, the name of the survey which collected the data. The industry code as specified by the BLS and the data type code as specified in the datatype table.\n",
+-                "\n",
+-                "## Set Up\n",
+-                "\n",
+-                "To connect to the database, use the same connection info used during the SQL lessons. \n",
+-                "\n",
+-                "For the assignment, we will be using `LaborStatisticsDB`."
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "dcbb5ae7-a9c8-4d48-8986-8a0f778cc6c6"
+-            },
+-            "source": [
+-                "## Database Exploration\n",
+-                "\n",
+-                "To start with, let’s get to know the database further.\n",
+-                "\n",
+-                "1. Use this space to make note of each table in the database, the columns within each table, each column’s data type, and how the tables are connected. You can write this down or draw a diagram. Whatever method helps you get an understanding of what is going on with `LaborStatisticsDB`.\n",
+-                "   \n",
+-                "   To add a photo, diagram or document to your file, drop the file into the folder that holds this notebook.  Use the link button to the right of the  </> symbol in the gray part of this cell, the link is just the name of your file."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "adb853fc-e2ab-416a-89f0-eb1d6f5b4af8",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "\n",
+-                "use LaborStatisticsDB;\n",
+-                "\n",
+-                "SELECT TABLE_NAME \n",
+-                "FROM LaborStatisticsDB.INFORMATION_SCHEMA.TABLES;\n",
+-                "\n",
+-                "SELECT COLUMN_NAME, DATA_TYPE \n",
+-                "FROM LaborStatisticsDB.INFORMATION_SCHEMA.COLUMNS\n",
+-                "WHERE TABLE_NAME = 'employment';\n",
+-                "\n",
+-                "\n"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {},
+-            "source": []
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {},
+-            "source": [
+-                "![alt text](IMG_1438.jpg)"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "87e95d63-f756-4afc-98d9-ed1dcfb95466"
+-            },
+-            "source": [
+-                "2. What is the datatype for women employees?"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": 2,
+-            "metadata": {
+-                "azdata_cell_guid": "e695b98b-25ed-4bec-8407-6f060e711df1",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [
+-                {
+-                    "ename": "SyntaxError",
+-                    "evalue": "invalid syntax (3083802150.py, line 1)",
+-                    "output_type": "error",
+-                    "traceback": [
+-                        "\u001b[1;36m  Cell \u001b[1;32mIn[2], line 1\u001b[1;36m\u001b[0m\n\u001b[1;33m    SELECT * FROM LaborStatisticsDB.dbo.datatype WHERE data_type_code = '10'\u001b[0m\n\u001b[1;37m                  ^\u001b[0m\n\u001b[1;31mSyntaxError\u001b[0m\u001b[1;31m:\u001b[0m invalid syntax\n"
+-                    ]
+-                }
+-            ],
+-            "source": [
+-                "SELECT * FROM LaborStatisticsDB.dbo.datatype WHERE data_type_code = '10'"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "5e72355c-a069-483d-8e57-33c8244e54d3"
+-            },
+-            "source": [
+-                "3. What is the series id for  women employees in the commercial banking industry in the financial activities supersector?"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "3ecf48c5-07bb-4063-aef5-96b4212f5150",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT s.series_id,s.data_type_code,s.supersector_code,s.industry_code,s.series_title from LaborStatisticsDB.dbo.series as s WHERE\n",
+-                "s.data_type_code in (select s.data_type_code from LaborStatisticsDB.dbo.series as s where s.series_title='Women employees')\n",
+-                "AND\n",
+-                "s.supersector_code in (select ss.supersector_code from LaborStatisticsDB.dbo.supersector as ss where ss.supersector_name Like '%financial%')\n",
+-                "AND\n",
+-                "s.industry_code in (select i.industry_code from LaborStatisticsDB.dbo.industry as i where i.industry_name LIKE '%commercial%banking%');\n",
+-                "     "
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "44ff5801-e75c-405f-bba2-e4f864356f0a"
+-            },
+-            "source": [
+-                "## Aggregate Your Friends and Code some SQL\n",
+-                "\n",
+-                "Put together the following:\n",
+-                "\n",
+-                "1. How many employees were reported in 2016 in all industries? Round to the nearest whole number."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "2f2aa59f-b6c5-470f-9f72-8bc0ec5178ab",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT ROUND(SUM(a.value), 0) AS AllEmployees_2016_Total\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON a.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '01';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "29d32b99-da7f-4c98-b757-ff3704d136e8"
+-            },
+-            "source": [
+-                "2. How many women employees were reported in 2016 in all industries? Round to the nearest whole number. "
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "6e478ad7-1a7e-460c-8000-1e6c10373731",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT ROUND(SUM(a.value), 0) AS WomenEmployees_2016_Total\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON a.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '10';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "6b173ff0-3ec9-45b1-b9c1-08351f9ae595"
+-            },
+-            "source": [
+-                "3. How many production/nonsupervisory employees were reported in 2016? Round to the nearest whole number. "
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "8532a572-5cd6-4d06-b770-c3f1c7c4e8b2",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT ROUND(SUM(a.value), 0) AS PE_Employees_2016_Total\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON a.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '06';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "f0e5cd3c-1e07-4718-858f-026045a0a438"
+-            },
+-            "source": [
+-                "4. In January 2017, what is the average weekly hours worked by production and nonsupervisory employees across all industries?"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "ed56d1e6-8622-4b43-923f-6892977b3409",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT CAST(SUM(CASE WHEN s.data_type_code = '81' THEN j.value ELSE 0 END) AS FLOAT)\n",
+-                "/ NULLIF(SUM(CASE WHEN s.data_type_code = '06' THEN j.value ELSE 0 END), 0) \n",
+-                "AS AvgWeeklyHours_PE_Jan2017\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "WHERE j.year = 2017 AND j.period = 'M01';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "8b6d0663-d4c3-4420-99ed-1c99f1d1942c"
+-            },
+-            "source": [
+-                "5. What is the total weekly payroll for production and nonsupervisory employees across all industries in January 2017? Round to the nearest penny."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "aba326a4-ea96-472e-9b4d-fff929aedc13",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT ROUND(SUM(CASE WHEN s.data_type_code = '82' THEN j.value ELSE 0 END) * 1000.0, -- convert thousands -> dollars\n",
+-                "2 ) AS TotalWeeklyPayroll_PE_Jan2017_Dollars\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "WHERE j.year = 2017\n",
+-                "AND j.period = 'M01';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "cdc4508a-a76c-4e36-a816-3c26ef47e710"
+-            },
+-            "source": [
+-                "6. In January 2017, for which industry was the average weekly hours worked by production and nonsupervisory employees the highest? Which industry was the lowest?"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "a6758e01-7ca6-43af-b8b8-04b8120c8a49",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT TOP 1 i.industry_name, \n",
+-                "ROUND(SUM(CASE WHEN s.data_type_code='81' THEN j.value END) \n",
+-                "/ SUM(CASE WHEN s.data_type_code='06' THEN j.value END), 2) AS avg_weekly_hours\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "JOIN LaborStatisticsDB.dbo.industry i ON s.industry_code = i.industry_code\n",
+-                "WHERE j.year=2017 AND j.period='M01'\n",
+-                "GROUP BY i.industry_name\n",
+-                "ORDER BY avg_weekly_hours DESC;\n",
+-                "\n",
+-                "-- Lowest average weekly hours\n",
+-                "SELECT TOP 1 i.industry_name, \n",
+-                "ROUND(SUM(CASE WHEN s.data_type_code='81' THEN j.value END) \n",
+-                "/ SUM(CASE WHEN s.data_type_code='06' THEN j.value END), 2) AS avg_weekly_hours\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "JOIN LaborStatisticsDB.dbo.industry i ON s.industry_code = i.industry_code\n",
+-                "WHERE j.year=2017 AND j.period='M01'\n",
+-                "GROUP BY i.industry_name\n",
+-                "ORDER BY avg_weekly_hours ASC;\n"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "328915a2-60d5-4c87-b6c2-8e55fab39af3"
+-            },
+-            "source": [
+-                "7. In January 2021, for which industry was the total weekly payroll for production and nonsupervisory employees the highest? Which industry was the lowest?"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "f3985220-b4b7-46f3-ba1a-e041a87be58b",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "NO DATA AVAILABLE FOR 2021\n",
+-                "\n",
+-                "SELECT DISTINCT year\n",
+-                "FROM LaborStatisticsDB.dbo.january_2021\n",
+-                "ORDER BY year;"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "9c5c9cb4-4376-4645-bf52-c359bad1853e"
+-            },
+-            "source": [
+-                "## Join in on the Fun\n",
+-                "\n",
+-                "Time to start joining! You can choose the type of join you use, just make sure to make a  note!\n",
+-                "\n",
+-                "1. Join `annual_2016` with `series` on `series_id`. We only want the data in the `annual_2016` table to be included in the result."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "\n",
+-                "SELECT a.series_id, a.value, s.series_title\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s\n",
+-                "ON a.series_id = s.series_id;"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "f0eefde2-fd6e-4cef-9426-3979c59ac61e"
+-            },
+-            "source": [
+-                "2. Join `series` and `datatype` on `data_type_code`."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "0850cbeb-06f8-4b15-9f87-7a9ca7a87e91",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "\n",
+-                "SELECT s.series_id, s.data_type_code, d.data_type_text\n",
+-                "FROM LaborStatisticsDB.dbo.series s\n",
+-                "JOIN LaborStatisticsDB.dbo.datatype d\n",
+-                "ON s.data_type_code = d.data_type_code\n",
+-                "ORDER BY s.series_id;"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "ada4ecfc-8180-4951-b013-1b4ad14bb2a9"
+-            },
+-            "source": [
+-                "3. Join `series` and `industry` on `industry_code`."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "4eaf2035-ec13-4c15-960f-a40fe73dc34d",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT TOP 50 s.series_id, s.industry_code, i.industry_name\n",
+-                "FROM LaborStatisticsDB.dbo.series s\n",
+-                "JOIN LaborStatisticsDB.dbo.industry i\n",
+-                "ON s.industry_code = i.industry_code\n",
+-                "ORDER BY s.series_id;"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "7111eeba-9ab9-45b9-a4c5-09b809c63907"
+-            },
+-            "source": [
+-                "## Subqueries, Unions, Derived Tables, Oh My!\n",
+-                "\n",
+-                "1. Write a query that returns the `series_id`, `industry_code`, `industry_name`, and `value` from the `january_2017` table but only if that value is greater than the average value for `annual_2016` of `data_type_code` 82."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "b747aa95-d3d7-4843-9f1a-13aae6902e3a",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "\n",
+-                "SELECT \n",
+-                "j.series_id,\n",
+-                "s.industry_code,\n",
+-                "i.industry_name,\n",
+-                "j.value\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "JOIN LaborStatisticsDB.dbo.industry i ON s.industry_code = i.industry_code\n",
+-                "WHERE j.value > (\n",
+-                "SELECT AVG(a.value)\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s2 ON a.series_id = s2.series_id\n",
+-                "WHERE s2.data_type_code = '82');"
+-            ]
+-        },
+-        {
+-            "attachments": {},
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "21baa05a-e30c-4993-a63e-1e221bb27aa6",
+-                "language": "sql"
+-            },
+-            "source": [
+-                "**Optional Bonus Question:** Write the above query as a common table expression!"
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "a816a7e7-2175-446c-b4e4-4a3d6667d281",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "\n",
+-                "WITH AvgAnnual2016 AS (\n",
+-                "SELECT AVG(a.value) AS avg_value\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON a.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '82')\n",
+-                "SELECT \n",
+-                "j.series_id,\n",
+-                "s.industry_code,\n",
+-                "i.industry_name,\n",
+-                "j.value\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "JOIN LaborStatisticsDB.dbo.industry i ON s.industry_code = i.industry_code\n",
+-                "JOIN AvgAnnual2016 avg2016 ON 1=1\n",
+-                "WHERE j.value > avg2016.avg_value;-- Optional CTE below"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "661cb463-cf71-40cb-9d03-9bb37492e2d5"
+-            },
+-            "source": [
+-                "2. Create a `Union` table comparing average weekly earnings of production and nonsupervisory employees between `annual_2016` and `january_2017` using the data type 30.  Round to the nearest penny.  You should have a column for the average earnings and a column for the year, and the period."
+-            ]
+-        },
+-        {
+-            "cell_type": "code",
+-            "execution_count": null,
+-            "metadata": {
+-                "azdata_cell_guid": "327f3949-b20f-4c1e-a126-6005719bf8df",
+-                "language": "sql",
+-                "vscode": {
+-                    "languageId": "sql"
+-                }
+-            },
+-            "outputs": [],
+-            "source": [
+-                "SELECT ROUND(AVG(a.value), 2) AS avg_weekly_earnings, '2016' AS year\n",
+-                "FROM LaborStatisticsDB.dbo.annual_2016 a\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON a.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '30'\n",
+-                "\n",
+-                "UNION\n",
+-                "\n",
+-                "SELECT ROUND(AVG(j.value), 2) AS avg_weekly_earnings, '2017' AS year\n",
+-                "FROM LaborStatisticsDB.dbo.january_2017 j\n",
+-                "JOIN LaborStatisticsDB.dbo.series s ON j.series_id = s.series_id\n",
+-                "WHERE s.data_type_code = '30';"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "cbda1089-6fdf-4b89-9651-54862cf7eb08"
+-            },
+-            "source": [
+-                "## Summarize Your Results\n",
+-                "\n",
+-                "With what you know now about the  Bureau of Labor Statistics (BLS) Current Employment Survey (CES) results and working with the Labor Statistics Database, answer the following questions. Note that while this is subjective, you should include relevant data to back up your opinion.\n",
+-                "\n",
+-                "1. During which time period did production and nonsupervisory employees fare better?"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "ed5db53d-2fec-41a3-a9d3-367a676e6c02"
+-            },
+-            "source": [
+-                "I think production and nonsupervisory employees did a little better in 2017. The average weekly earnings and total payroll were higher than in 2016, based on the data I found. It shows there was some improvement that year overall."
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "e0028946-9a7f-48ba-a14d-6685d55e9423"
+-            },
+-            "source": [
+-                "2. In which industries did production and nonsupervisory employees fare better?"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "d1fc3b34-cee3-4565-8233-fbb225573974"
+-            },
+-            "source": [
+-                "From the queries, I saw that industries like Mining and Logging had the highest average weekly hours, while Leisure and Hospitality had the lowest. This means people in goods-producing industries generally worked more hours and earned more compared to those in service industries"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "0db4c4b1-151b-43f8-9a7a-14d45e15a678"
+-            },
+-            "source": [
+-                "3. Now that you have explored the datasets, is there any data or information that you wish you had in this analysis?"
+-            ]
+-        },
+-        {
+-            "cell_type": "markdown",
+-            "metadata": {
+-                "azdata_cell_guid": "072f17a7-ad63-493a-934f-33660ae1d576"
+-            },
+-            "source": [
+-                "Yes, I wish there was newer data after 2021 to compare more years. It would also help to have data by state or region to see local differences. Having inflation-adjusted earnings would also make it easier to see real wage growth instead of just raw numbers."
+-            ]
+-        }
+-    ],
+-    "metadata": {
+-        "kernelspec": {
+-            "display_name": "base",
+-            "language": "python",
+-            "name": "python3"
+-        },
+-        "language_info": {
+-            "codemirror_mode": {
+-                "name": "ipython",
+-                "version": 3
+-            },
+-            "file_extension": ".py",
+-            "mimetype": "text/x-python",
+-            "name": "python",
+-            "nbconvert_exporter": "python",
+-            "pygments_lexer": "ipython3",
+-            "version": "3.13.5"
+-        }
+-    },
+-    "nbformat": 4,
+-    "nbformat_minor": 2
+-}
+diff --git a/sql-part-1/exercises/SQL-Part-1-Exercises.ipynb b/sql-part-1/exercises/SQL-Part-1-Exercises.ipynb
+index 98cb722..68119f3 100644
+--- a/sql-part-1/exercises/SQL-Part-1-Exercises.ipynb
++++ b/sql-part-1/exercises/SQL-Part-1-Exercises.ipynb
+@@ -68,7 +68,8 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT TOP 1000 *\n",
++    "FROM BooksDB.dbo.books;"
+    ]
+   },
+   {
+@@ -88,7 +89,8 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(*) AS total_titles\n",
++    "FROM BooksDB.dbo.books;"
+    ]
+   },
+   {
+@@ -108,7 +110,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(*) AS books_before_1800\n",
++    "FROM BooksDB.dbo.books\n",
++    "WHERE original_publication_year < 1800;"
+    ]
+   },
+   {
+@@ -128,7 +132,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT DISTINCT authors\n",
++    "FROM BooksDB.dbo.books\n",
++    "ORDER BY authors;"
+    ]
+   },
+   {
+@@ -148,7 +154,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(*) AS english_books\n",
++    "FROM BooksDB.dbo.books\n",
++    "WHERE language_code = 'eng'\n",
++    "   OR language_code LIKE 'en-%';"
+    ]
+   },
+   {
+@@ -168,7 +177,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(*) AS world_war_i_era_books\n",
++    "FROM BooksDB.dbo.books\n",
++    "WHERE original_publication_year BETWEEN 1914 AND 1921;"
+    ]
+   },
+   {
+@@ -201,7 +212,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT TOP 1000 *\n",
++    "FROM [dbo].[book_tags]\n",
++    "ORDER BY tag_id"
+    ]
+   },
+   {
+@@ -221,7 +234,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "--- Code Here:"
++    "SELECT COUNT(goodreads_book_id) AS count_of_book_ids_per_tag_id, tag_id\n",
++    "FROM [dbo].[book_tags]\n",
++    "GROUP BY tag_id\n",
++    "ORDER BY count_of_book_ids_per_tag_id DESC\n"
+    ]
+   },
+   {
+@@ -241,7 +257,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(goodreads_book_id) AS count_of_book_ids_per_tag_id, tag_id\n",
++    "FROM [dbo].[book_tags]\n",
++    "GROUP BY tag_id\n",
++    "ORDER BY count_of_book_ids_per_tag_id DESC"
+    ]
+   },
+   {
+@@ -274,7 +293,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT TOP 1000 *\n",
++    "FROM [dbo].[ratings]\n",
++    "ORDER BY rating DESC"
+    ]
+   },
+   {
+@@ -294,7 +315,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT([user_id]) AS critics\n",
++    "FROM [dbo].[ratings]\n",
++    "WHERE rating <2\n"
+    ]
+   },
+   {
+@@ -314,7 +337,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT COUNT(book_id) AS crowd_pleasers\n",
++    "FROM [dbo].[ratings]\n",
++    "WHERE rating >4"
+    ]
+   },
+   {
+@@ -348,7 +373,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT *\n",
++    "FROM [dbo].[tags]\n",
++    "WHERE tag_name LIKE '%mystery%'"
+    ]
+   },
+   {
+@@ -406,7 +433,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT user_id, COUNT(book_id) AS total_books_to_read\n",
++    "FROM BooksDB.dbo.to_read\n",
++    "GROUP BY [user_id]\n",
++    "ORDER BY [user_id] ASC"
+    ]
+   },
+   {
+@@ -428,7 +458,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Code Here:"
++    "SELECT user_id, COUNT(book_id) AS total_books_to_read\n",
++    "FROM BooksDB.dbo.to_read\n",
++    "GROUP BY [user_id]\n",
++    "ORDER BY total_books_to_read DESC"
+    ]
+   }
+  ],
+diff --git a/sql-part-1/studio/SQL-Part-1-Studio.ipynb b/sql-part-1/studio/SQL-Part-1-Studio.ipynb
+index 7034908..5e5d296 100644
+--- a/sql-part-1/studio/SQL-Part-1-Studio.ipynb
++++ b/sql-part-1/studio/SQL-Part-1-Studio.ipynb
+@@ -38,7 +38,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return top 100 results"
++    "select top 100 book_id,authors,title,average_rating 'AVERAGE' from BOOKSDB.dbo.books order by AVERAGE DESC;\n",
++    "\n",
++    "\n"
+    ]
+   },
+   {
+@@ -58,7 +60,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return least popular book"
++    "SELECT top 1 book_id, title, average_rating\n",
++    "FROM BooksDB.dbo.books\n",
++    "ORDER BY average_rating ASC;"
+    ]
+   },
+   {
+@@ -78,7 +82,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return most popular tag"
++    "-- returnSELECT Top 1 goodreads_book_id, tag_id, [count]\n",
++    "From BooksDB.dbo.book_tags\n",
++    "ORDER BY [count] DESC; most popular tag"
+    ]
+   },
+   {
+@@ -98,7 +104,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return name of most popular tag"
++    "-- SELECT tag_name\n",
++    "FROM BooksDB.dbo.tags\n",
++    "where tag_id = 30574;return name of most popular tag"
+    ]
+   },
+   {
+@@ -118,7 +126,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return number of books published in the first decade of 2000"
++    "\n",
++    "select count (book_id) as books_from_the_2000s\n",
++    "From Books\n",
++    "Where original_publication_year BETWEEN 2000 And 2010;"
+    ]
+   },
+   {
+@@ -138,7 +149,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return number of books that contain the word, \"happy\""
++    "-- return number of books that contain the word, \"happy\"SELECT Top 1 goodreads_book_id, tag_id, [count]\n",
++    "Select count(book_id)\n",
++    "FROM BooksDB.dbo.books\n",
++    "where title LIKE '%happy%';"
+    ]
+   },
+   {
+@@ -158,7 +172,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return all books from the top 3 authors, sort by author and rating"
++    "-- retSELECT book_id, authors, title, average_rating as 'rating'\n",
++    "FROM BooksDB.dbo.books\n",
++    "WHERE authors IN ('Bill Watterson','Brandon Sanderson', 'J.K. Rowling')\n",
++    "order by authors DESC, rating DESC;urn all books from the top 3 authors, sort by author and rating"
+    ]
+   },
+   {
+@@ -178,7 +195,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- return number of authors whose first name is between rock and roll"
++    "-- relect authors\n",
++    "  From BooksDB.dbo.books\n",
++    "  where authors BETWEEN 'rock'and 'roll';eturn number of authors whose first name is between rock and roll"
+    ]
+   },
+   {
+@@ -200,7 +219,10 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Add your query here"
++    "SELECT Top 1 authors, count(*) as Books_Count\n",
++    "From BooksDB.dbo.books\n",
++    "GROUP BY authors\n",
++    "Order by Books_Count DESC;\n"
+    ]
+   },
+   {
+@@ -236,8 +258,22 @@
+   }
+  ],
+  "metadata": {
++  "kernelspec": {
++   "display_name": "base",
++   "language": "python",
++   "name": "python3"
++  },
+   "language_info": {
+-   "name": "python"
++   "codemirror_mode": {
++    "name": "ipython",
++    "version": 3
++   },
++   "file_extension": ".py",
++   "mimetype": "text/x-python",
++   "name": "python",
++   "nbconvert_exporter": "python",
++   "pygments_lexer": "ipython3",
++   "version": "3.13.5"
+   }
+  },
+  "nbformat": 4,
+diff --git a/sql-part-2/exercises/SQL-Part-2-Exercises.ipynb b/sql-part-2/exercises/SQL-Part-2-Exercises.ipynb
+index 0ce26bb..b6b9eec 100644
+--- a/sql-part-2/exercises/SQL-Part-2-Exercises.ipynb
++++ b/sql-part-2/exercises/SQL-Part-2-Exercises.ipynb
+@@ -1,20 +1,11 @@
+ {
+-    "metadata": {
+-        "kernelspec": {
+-            "name": "SQL",
+-            "display_name": "SQL",
+-            "language": "sql"
+-        },
+-        "language_info": {
+-            "name": "sql",
+-            "version": ""
+-        }
+-    },
+-    "nbformat_minor": 2,
+-    "nbformat": 4,
+     "cells": [
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "2b5a5976-8b51-4e24-a08d-234ef97f379a"
++            },
+             "source": [
+                 "# Exercises\n",
+                 "\n",
+@@ -23,267 +14,319 @@
+                 "## String Functions\n",
+                 "\n",
+                 "Write a query that returns the last 3 characters of the base name in <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">. Do you see anything that is a common abbreviation at the end of business names?</span>"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "2b5a5976-8b51-4e24-a08d-234ef97f379a"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "392f7b72-9acf-44a4-bb53-6c29090c5d75",
+-                "tags": [],
+-                "language": "sql"
++                "language": "sql",
++                "tags": []
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 8
++            "source": [
++                "select RIGHT(Base_Name,3) 'stripped chars' from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "The number of trips and the number of pickups are both stored as strings in <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">. This is because the data provided included spaces in some of the numbers. Write a query that returns the location of spaces in both of these columns.</span>"
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "6c206898-77f4-4357-8d17-33192980f45d"
+             },
+-            "attachments": {}
++            "source": [
++                "The number of trips and the number of pickups are both stored as strings in <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">. This is because the data provided included spaces in some of the numbers. Write a query that returns the location of spaces in both of these columns.</span>"
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "3c810c3d-4e66-447b-8326-19e59d8a1b88",
+                 "language": "sql"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 9
++            "source": [
++                "-- select top 30 Number_of_Trips,Number_of_Vehicles from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n",
++                "\n",
++                "-- DECLARE @POS INT\n",
++                "-- DECLARE  @LEN INT\n",
++                "-- set @LEN=LEN(RideShareDB.dbo.other_FHV_services_jan_aug_2015.Number_of_Trips)\n",
++                "\n",
++                "-- select SUBSTRING(Number_of_Trips,CHARINDEX(' ',Number_of_Trips),len(Number_of_Trips))\n",
++                "-- from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n",
++                "select CHARINDEX(' ',Number_of_Trips) 'white space', Number_of_Trips from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n",
++                "     "
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "b138ac53-9fff-4320-9ff1-08717873f2ee"
++            },
+             "source": [
+                 "## Date Functions\n",
+                 "\n",
+                 "For <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">, display the name of month of the pickup date and order in descending order. Is the result of this query what you expected?</span>"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "b138ac53-9fff-4320-9ff1-08717873f2ee"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "8abd404c-a360-4b10-8d6b-8b34ef763bc7",
+-                "tags": [],
+-                "language": "sql"
++                "language": "sql",
++                "tags": []
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 10
++            "source": [
++                "select  datename(month,Pick_Up_Date) 'Month' from RideShareDB.dbo.other_FHV_services_jan_aug_2015 order by datename(month,Pick_Up_Date) desc;"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "Using <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">, write a query that returns the day number of the pickup date and month name and orders it in ascending order by day number.</span>"
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "aa6bf15c-b847-45f0-ba0d-79c7636c4578"
+             },
+-            "attachments": {}
++            "source": [
++                "Using <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">, write a query that returns the day number of the pickup date and month name and orders it in ascending order by day number.</span>"
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "46dcd617-8dcf-4c15-b5fa-c0ec04f2bf29",
+                 "language": "sql"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 11
++            "source": [
++                "select DATENAME(day,Pick_Up_Date) 'day',DATENAME(month,Pick_Up_Date)'month' from RideShareDB.dbo.other_FHV_services_jan_aug_2015 order by 'day' asc \n"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "348342a2-6039-43b1-8461-841288deee94"
++            },
+             "source": [
+                 "## Aggregate Functions\n",
+                 "\n",
+                 "Write a query that returns the most easterly Lyft pickup."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "348342a2-6039-43b1-8461-841288deee94"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "f2cb1b41-c92a-47ea-bd77-7bafd78af1d4",
+-                "tags": [],
+-                "language": "sql"
++                "language": "sql",
++                "tags": []
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 12
++            "source": [
++                "select * from RideShareDB.dbo.lyft where start_lng = (select max(start_lng) from RideShareDB.dbo.lyft);"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "Write a query the returns the most northerly Lyft pickup."
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "bd589862-044d-4909-8565-8aa4771d9c00"
+             },
+-            "attachments": {}
++            "source": [
++                "Write a query the returns the most northerly Lyft pickup."
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "189b7c25-0dfa-4ca0-a683-d402b3875abd",
+                 "language": "sql"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 13
++            "source": [
++                "select * from RideShareDB.dbo.lyft where start_lat = (select max(start_lat) from RideShareDB.dbo.lyft);"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "Using <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">, write a query that connects the the base number and the base name in a string that uses the following format: base_number: base_name.</span>"
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "674f8758-14bf-4712-b029-0ad0447617fb"
+             },
+-            "attachments": {}
++            "source": [
++                "Using <span style=\"color: rgb(163, 21, 21); font-family: Menlo, Monaco, Consolas, &quot;Droid Sans Mono&quot;, &quot;Courier New&quot;, monospace, &quot;Droid Sans Fallback&quot;; font-size: 12px;\">other_FHV_services_jan_aug_2015</span><span style=\"color: var(--vscode-foreground);\">, write a query that connects the the base number and the base name in a string that uses the following format: base_number: base_name.</span>"
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "f6f4b247-63c0-4997-8769-204e37a55c08",
+                 "language": "sql"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 14
++            "source": [
++                "-- SELECT COALESCE(original_title, title) + ' by ' + authors AS 'Reading List'\n",
++                "--  FROM BooksDB.dbo.books\n",
++                "--  WHERE authors LIKE 'Sophocles%';\n",
++                "-- select Base_Number,Base_Name from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n",
++                "-- select COALESCE(Base_Number,Base_Name)  from RideShareDB.dbo.other_FHV_services_jan_aug_2015\n",
++                "SELECT\n",
++                "  CONCAT_WS('base_number:base_name ', Base_Number, Base_Name) from RideShareDB.dbo.other_FHV_services_jan_aug_2015;"
++            ]
+         }
+-    ]
+-}
+\ No newline at end of file
++    ],
++    "metadata": {
++        "kernelspec": {
++            "display_name": "SQL",
++            "language": "sql",
++            "name": "SQL"
++        },
++        "language_info": {
++            "name": "sql",
++            "version": ""
++        }
++    },
++    "nbformat": 4,
++    "nbformat_minor": 2
++}
+diff --git a/sql-part-2/studio/SQL-Part-2-Studio.ipynb b/sql-part-2/studio/SQL-Part-2-Studio.ipynb
+index f335bec..4e19a46 100644
+--- a/sql-part-2/studio/SQL-Part-2-Studio.ipynb
++++ b/sql-part-2/studio/SQL-Part-2-Studio.ipynb
+@@ -1,26 +1,11 @@
+ {
+-    "metadata": {
+-        "kernelspec": {
+-            "name": "SQL",
+-            "display_name": "SQL",
+-            "language": "sql"
+-        },
+-        "language_info": {
+-            "name": "sql",
+-            "version": ""
+-        },
+-        "extensions": {
+-            "vscode": {
+-                "version": 1,
+-                "views": []
+-            }
+-        }
+-    },
+-    "nbformat_minor": 2,
+-    "nbformat": 4,
+     "cells": [
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "bbaa021d-dbcb-4f90-a05f-f280d524589a"
++            },
+             "source": [
+                 "# Lesson 11: SQL Part 2 Studio\n",
+                 "\n",
+@@ -31,364 +16,435 @@
+                 "**The Dataset:**   \n",
+                 "\n",
+                 "> We will be working with the **BooksDB dataset** from Lesson 10.  You should already have access to it."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "bbaa021d-dbcb-4f90-a05f-f280d524589a"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "markdown",
+-            "source": [
+-                "## The Questions:"
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "bfc33995-70d4-4403-a870-39244e5e9727"
+-            }
++            },
++            "source": [
++                "## The Questions:"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "29e63840-f200-4b1b-9239-4dc60a402c1d"
++            },
+             "source": [
+                 "1.  Create a query that returns the longest title in the dataset.  We can do this in two steps.\n",
+                 "\n",
+                 "> A. Create a query that returns the length of the longest title.\n",
+                 "> \n",
+                 "> B. Create a query that uses the length you found in step A to find the longest title."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "29e63840-f200-4b1b-9239-4dc60a402c1d"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "fc1a211d-ea4e-446a-bbf8-e31499c50aba"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.111"
++                        "text/html": [
++                            "Total execution time: 00:00:00.111"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 1
++            "source": [
++                "SELECT MAX(LEN(title))\n",
++                "FROM BooksDB.dbo.books;\n",
++                "\n",
++                "SELECT title\n",
++                "FROM BooksDB.dbo.books\n",
++                "WHERE LEN(title) = (SELECT MAX(LEN(title)) FROM BooksDB.dbo.books)\n"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "5de64491-7324-44ce-bda4-e22b07229854"
++            },
+             "source": [
+                 "2.  Use what you learned in question 1 to find the shortest author name.  \n",
+                 "\n",
+                 "> A. Create a query that returns the length of the shortest author.\n",
+                 "> \n",
+                 "> B. Create a query that returns the shortest author's name."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "5de64491-7324-44ce-bda4-e22b07229854"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "61423c75-cb55-470f-b062-a1901d3da67c"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.053"
++                        "text/html": [
++                            "Total execution time: 00:00:00.053"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 2
++            "source": [
++                "Select MIN(len(authors)) as Shortest_author\n",
++                "from BooksDB.dbo.bookse here:\n",
++                "\n",
++                "Select authors\n",
++                "from BooksDB.dbo.books\n",
++                "where LEN(authors) = (Select MIN(len(authors)) FROM BooksDB.dbo.books)"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "97f50346-9729-4d1b-926c-e1b53c5c5e68"
++            },
+             "source": [
+                 "3\\. How many titles contain the word \"The\"?  \n",
+                 "\n",
+                 "  \n",
+                 "\n",
+                 "> A. Is there a difference between the number of titles that use \"The\" or \"the\"?"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "97f50346-9729-4d1b-926c-e1b53c5c5e68"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "f58433db-eb3b-46e0-bb4d-85ca52d359b5"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.053"
++                        "text/html": [
++                            "Total execution time: 00:00:00.053"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 3
++            "source": [
++                "SELECT COUNT (*) title_with_the\n",
++                "FROM BooksDB.dbo.books\n",
++                "WHERE title LIKE '%the%';"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "4.  How many authors' names _start_ with 'Z'?"
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "e0d89eca-410d-4e29-82ca-265b79c73fea"
+             },
+-            "attachments": {}
++            "source": [
++                "4.  How many authors' names _start_ with 'Z'?"
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "850f04c8-458a-4cfb-95c4-4dbb7a3d63d0"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.072"
++                        "text/html": [
++                            "Total execution time: 00:00:00.072"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 4
++            "source": [
++                "select count (*) as authors_starting_with_zee        \n",
++                "from BooksDB.dbo.books\n",
++                "where authors LIKE 'Z%'"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "7066afeb-79d2-4e7f-b497-cbde17655b19"
++            },
+             "source": [
+                 "5\\. How many books have been identified as printed in a language other than English?  There are four language codes for English: 'en', 'eng', 'en-US', and 'en-UK'.  Use LEFT to answer the question.  (Do not use the wildcard)\n",
+                 "\n",
+                 "You might want to use one of these [comparison operators](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/comparison-operators-transact-sql?view=sql-server-ver15)."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "7066afeb-79d2-4e7f-b497-cbde17655b19"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "5a85f5ae-dd59-4fa1-828a-c63fa330ff7f"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.051"
++                        "text/html": [
++                            "Total execution time: 00:00:00.051"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 5
++            "source": [
++                "select (title) as non_english_books\n",
++                "from BooksDB.dbo.books\n",
++                "WHERE LEFT(language_code,3) <>   'en' and left(language_code,3) <> 'eng' and left (language_code,3) <> 'en-';"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "6\\. Retry question 5 using SUBSTRING."
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "93153cd1-ecea-4e4b-87f5-2214993a7291"
+             },
+-            "attachments": {}
++            "source": [
++                "6\\. Retry question 5 using SUBSTRING."
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "7756ae02-4ec2-4456-b3a7-c3604bf07e26"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:02.896"
++                        "text/html": [
++                            "Total execution time: 00:00:02.896"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 6
++            "source": [
++                "SELECT title\n",
++                "FROM BooksDB.dbo.books\n",
++                "WHERE SUBSTRING(language_code,1,2) <> 'en';"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "c8124542-ea76-4153-96ef-f4db908fbd6c"
++            },
+             "source": [
+                 "7.  Create a column that returns the title, authors, and language codes.  Concatenate these elements so that they return in the following way: title by authors in language\\_code language.\n",
+                 "\n",
+                 "> A.  Check each selected column to see where any values are NULL.  Did any of the columns contain NULL values?  If so, which one?"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "c8124542-ea76-4153-96ef-f4db908fbd6c"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "26705af1-6191-48b9-b649-7bc93cad102d"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.048"
++                        "text/html": [
++                            "Total execution time: 00:00:00.048"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 7
++            "source": [
++                "SELECT CONCAT(title, ' by ', authors, ' in ', language_code) AS title_by_authors\n",
++                "FROM BooksDB.dbo.books;\n"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "17fd76a8-afa7-4d86-a200-2902d7310a2b"
++            },
+             "source": [
+                 "8.  Update the query in question 7 using COALESCE to change the language code values from NULL to 'unknown'.\n",
+                 "\n",
+                 "> A.  Has this changed the language\\_code  where the values are NULL?"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "17fd76a8-afa7-4d86-a200-2902d7310a2b"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "f9694996-4545-48b9-9981-325b5c590570"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.057"
++                        "text/html": [
++                            "Total execution time: 00:00:00.057"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 8
++            "source": [
++                "SELECT CASE WHEN title IS NULL THEN 'title contains NULL'  WHEN authors IS NULL THEN 'authors contains NULL' WHEN language_code IS NULL THEN 'language_code contains NULL'  END AS result\n",
++                "FROM BooksDB.dbo.books;"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "57b87290-135f-478d-bf1c-2262759f8da5"
++            },
+             "source": [
+                 "9\\. Revisit question 7 using ISNULL instead of COALESCE.\n",
+                 "\n",
+                 "> A.  Has this changed the language\\_code  where the values are NULL?"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "57b87290-135f-478d-bf1c-2262759f8da5"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "a9670717-6dc6-4685-9f62-7a588753b4a9"
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00.056"
++                        "text/html": [
++                            "Total execution time: 00:00:00.056"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 9
++            "source": [
++                "select ISNULL(title,'N/A') + '-'+ ISNULL(authors,'NA')+'-'+ISNULL(language_code,'NVL')"
++            ]
+         }
+-    ]
+-}
+\ No newline at end of file
++    ],
++    "metadata": {
++        "extensions": {
++            "vscode": {
++                "version": 1,
++                "views": []
++            }
++        },
++        "kernelspec": {
++            "display_name": "SQL",
++            "language": "sql",
++            "name": "SQL"
++        },
++        "language_info": {
++            "name": "sql",
++            "version": ""
++        }
++    },
++    "nbformat": 4,
++    "nbformat_minor": 2
++}
+diff --git a/sql-part-3/exercises/SQL-Part-3-Exercises.ipynb b/sql-part-3/exercises/SQL-Part-3-Exercises.ipynb
+index 3b63aec..3ec78a1 100644
+--- a/sql-part-3/exercises/SQL-Part-3-Exercises.ipynb
++++ b/sql-part-3/exercises/SQL-Part-3-Exercises.ipynb
+@@ -1,20 +1,10 @@
+ {
+-    "metadata": {
+-        "kernelspec": {
+-            "name": "SQL",
+-            "display_name": "SQL",
+-            "language": "sql"
+-        },
+-        "language_info": {
+-            "name": "sql",
+-            "version": ""
+-        }
+-    },
+-    "nbformat_minor": 2,
+-    "nbformat": 4,
+     "cells": [
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "c739e118-2a3a-45f9-bd51-090c836e7a7e"
++            },
+             "source": [
+                 "# SQL Part 3 Exercises: Joins\n",
+                 "\n",
+@@ -27,13 +17,13 @@
+                 "In **questions 5-8**, you will be asked to join tables to find results about titles, tags, and the books users want to read.\n",
+                 "\n",
+                 "As you go through the questions, you will see 'Minimum Desired Output'.  This will provide you with the bare minimum columns needed to answer the questions.  When you write the queries, add as many additional columns as you need to best find your answers."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "c739e118-2a3a-45f9-bd51-090c836e7a7e"
+-            }
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "cdfaf133-068f-496d-8ecb-ecfde5c8d9f5"
++            },
+             "source": [
+                 "## QUESTION 1:  Exploring a `LEFT JOIN` using the `books` and `to_read` tables\n",
+                 "\n",
+@@ -47,13 +37,16 @@
+                 "- When we added a `WHERE tr.user_id IS NOT NULL` clause (line 14), how did the table change?  Why?\n",
+                 "\n",
+                 "> Your Answer:"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "cdfaf133-068f-496d-8ecb-ecfde5c8d9f5"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
++            "execution_count": null,
++            "metadata": {
++                "azdata_cell_guid": "a2038d22-5f42-4539-af89-d1fd36c66d47",
++                "language": "sql"
++            },
++            "outputs": [],
+             "source": [
+                 "/*\n",
+                 "-- Query 1: LEFT JOIN\n",
+@@ -71,19 +64,13 @@
+                 "WHERE tr.user_id IS NOT NULL\n",
+                 "ORDER BY b.average_rating;\n",
+                 "*/"
+-            ],
+-            "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+-                "azdata_cell_guid": "a2038d22-5f42-4539-af89-d1fd36c66d47",
+-                "language": "sql"
+-            },
+-            "outputs": [],
+-            "execution_count": null
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "e5b293e1-3c99-4696-93db-71e77df50757"
++            },
+             "source": [
+                 "## **QUESTION 2:** Exploring `RIGHT` joins with the `books` and `to_read` tables\n",
+                 "\n",
+@@ -96,13 +83,16 @@
+                 "**Part B:** How do the RIGHT-joined tables differ from the LEFT-joined tables in Question 1?\n",
+                 "\n",
+                 "> Your Answer:"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "e5b293e1-3c99-4696-93db-71e77df50757"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
++            "execution_count": null,
++            "metadata": {
++                "azdata_cell_guid": "3916ff86-e45b-47d3-ae94-c1ee7903c7b9",
++                "language": "sql"
++            },
++            "outputs": [],
+             "source": [
+                 "/*\n",
+                 "-- Query 1: RIGHT JOIN\n",
+@@ -111,19 +101,13 @@
+                 "RIGHT JOIN BooksDB.dbo.to_read AS tr\n",
+                 "ON b.best_book_id = tr.book_id;\n",
+                 "*/"
+-            ],
+-            "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+-                "azdata_cell_guid": "3916ff86-e45b-47d3-ae94-c1ee7903c7b9",
+-                "language": "sql"
+-            },
+-            "outputs": [],
+-            "execution_count": null
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "db92a0de-8cbe-47b2-a989-c77138c427fd"
++            },
+             "source": [
+                 "## **QUESTION 3:** Exploring FULL JOINS with the `books` and `to_read` tables\n",
+                 "\n",
+@@ -132,13 +116,16 @@
+                 "**Part A:**  Look at the table and explore how it was populated.  Try manipulating the query to better understand how this table works.  Try adding a WHERE clause, or ORDER BY a column on the `books` table.  Based on your exploration, can you think of when you might want a FULL join rather than a LEFT, RIGHT, or INNER?\n",
+                 "\n",
+                 "> Your Answer:"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "db92a0de-8cbe-47b2-a989-c77138c427fd"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
++            "execution_count": null,
++            "metadata": {
++                "azdata_cell_guid": "421beb17-491d-4d0b-9a83-4383e9a878f6",
++                "language": "sql"
++            },
++            "outputs": [],
+             "source": [
+                 "/*\n",
+                 "-- FULL JOIN\n",
+@@ -147,19 +134,13 @@
+                 "FULL JOIN BooksDB.dbo.to_read AS tr\n",
+                 "ON b.book_id = tr.book_id;\n",
+                 "*/"
+-            ],
+-            "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+-                "azdata_cell_guid": "421beb17-491d-4d0b-9a83-4383e9a878f6",
+-                "language": "sql"
+-            },
+-            "outputs": [],
+-            "execution_count": null
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "c9219b58-ba70-4f18-b40d-5a959f50ec10"
++            },
+             "source": [
+                 "## **QUESTION 4:** Exploring INNER Joins with the `books` and `to_read` tables\n",
+                 "\n",
+@@ -176,13 +157,16 @@
+                 "**Part C:**  When using SQL, you are usually returning much larger tables so every line of code will add to the compilation and return time.  Rewrite this inner join query so that it contains no redundant code.\n",
+                 "\n",
+                 "> Your Answer:  Update the query in the code box below."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "c9219b58-ba70-4f18-b40d-5a959f50ec10"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
++            "execution_count": null,
++            "metadata": {
++                "azdata_cell_guid": "6ee6b18f-d81b-46b8-857b-95e2e88bd1fd",
++                "language": "sql"
++            },
++            "outputs": [],
+             "source": [
+                 "/*\n",
+                 "-- INNER JOIN\n",
+@@ -193,19 +177,13 @@
+                 "WHERE b.title IS NOT NULL\n",
+                 "ORDER BY tr.book_id;\n",
+                 "*/"
+-            ],
+-            "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+-                "azdata_cell_guid": "6ee6b18f-d81b-46b8-857b-95e2e88bd1fd",
+-                "language": "sql"
+-            },
+-            "outputs": [],
+-            "execution_count": null
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "6c20039d-2496-42c6-b5fc-db8f1ded0ce4"
++            },
+             "source": [
+                 "## **QUESTION 5:**  Using joins to find the most tagged book and the most popular tag\n",
+                 "\n",
+@@ -234,28 +212,32 @@
+                 "*Minimum Desired Output:* The tag name for the most popular tag used for the most tagged book.\n",
+                 "\n",
+                 "**Tag Name:**"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "6c20039d-2496-42c6-b5fc-db8f1ded0ce4"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code Here"
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+                 "azdata_cell_guid": "c1d7f859-cf56-424e-bd90-0203ab5a1cdd",
+                 "language": "sql"
+             },
+             "outputs": [],
+-            "execution_count": null
++            "source": [
++                "SELECT TOP 1 \n",
++                "    b.title, \n",
++                "    COUNT(bt.goodreads_book_id) AS tag_count\n",
++                "FROM BooksDB.dbo.books AS b\n",
++                "JOIN BooksDB.dbo.book_tags AS bt \n",
++                "    ON b.book_id = bt.goodreads_book_id\n",
++                "GROUP BY b.title\n",
++                "ORDER BY tag_count DESC;"
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "0afe0108-c632-4cde-b7e0-5e699c066e03"
++            },
+             "source": [
+                 "## QUESTION 6: Find a book based on a tag of your choice using joins.\n",
+                 "\n",
+@@ -276,28 +258,27 @@
+                 "*Minimum Desired Output:* title and tag count\n",
+                 "\n",
+                 "**Your Title and Number of times the tag was used:**"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "0afe0108-c632-4cde-b7e0-5e699c066e03"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code Here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+                 "azdata_cell_guid": "761b4d46-2218-486e-8336-cda901bc8551",
+                 "language": "sql"
+             },
+             "outputs": [],
+-            "execution_count": null
++            "source": [
++                "SELECT tag_id, tag_name\n",
++                "FROM BooksDB.dbo.tags\n",
++                "WHERE tag_name LIKE '%halloween%';"
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "d684cef6-783d-43d1-a017-f5e5d83c46da"
++            },
+             "source": [
+                 "## **QUESTION 7:** What are the top 10 most popular book titles on the 'to read' list?\n",
+                 "\n",
+@@ -310,28 +291,33 @@
+                 "*Hint:* Suggest using an alias for the aggregation you will need to run on the `user_id`\n",
+                 "\n",
+                 "*Minimum Desired Output:* title and aliased column"
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "d684cef6-783d-43d1-a017-f5e5d83c46da"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code Here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+                 "azdata_cell_guid": "3247ef18-3603-47b0-b2a1-0b6a70e8de33",
+                 "language": "sql"
+             },
+             "outputs": [],
+-            "execution_count": null
++            "source": [
++                "SELECT\n",
++                "    b.title,\n",
++                "    COUNT(tr.user_id) AS popularity\n",
++                "FROM to_read AS tr\n",
++                "JOIN books AS b\n",
++                "    ON tr.book_id = b.book_id\n",
++                "GROUP BY b.title\n",
++                "ORDER BY popularity DESC\n",
++                "LIMIT 10;\n"
++            ]
+         },
+         {
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "d7f2f6a3-ecc3-4629-aacd-312723da07af"
++            },
+             "source": [
+                 "## **QUESTION 8:** Largest 'To Read' Lists\n",
+                 "\n",
+@@ -342,25 +328,55 @@
+                 "_Minimum Desired Output:_ `user_id` and your aliased column of titles.\n",
+                 "\n",
+                 "**Part B:**  The longest list length is 15 titles total, and is shared by 4 different users.  Select one of the uses and print out their entire 'to read' list."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "d7f2f6a3-ecc3-4629-aacd-312723da07af"
+-            }
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                "-- Code Here:"
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "vscode": {
+-                    "languageId": "sql"
+-                },
+                 "azdata_cell_guid": "a7ae1df0-4d43-4e27-b635-eed926d2311f",
+                 "language": "sql"
+             },
+             "outputs": [],
+-            "execution_count": null
++            "source": [
++                "-- Code Here:SELECT\n",
++                "    user_id,\n",
++                "    COUNT(book_id) AS num_titles\n",
++                "FROM to_read\n",
++                "GROUP BY user_id\n",
++                "ORDER BY num_titles DESC\n",
++                "LIMIT 10;\n",
++                "\n",
++                "\n",
++                "select BooksDB.dbo.books.title'to_read',BooksDB.dbo.to_read.user_id from \n",
++                "BooksDB.dbo.books join BooksDB.dbo.to_read on BooksDB.dbo.books.book_id=BooksDB.dbo.to_read.book_id \n",
++                "where BooksDB.dbo.to_read.user_id='12483'\n",
++                "\n",
++                "\n",
++                "\n",
++                "\n",
++                "\n",
++                "\n",
++                "SELECT\n",
++                "    b.title\n",
++                "FROM to_read AS tr\n",
++                "JOIN books AS b\n",
++                "    ON tr.book_id = b.book_id\n",
++                "WHERE tr.user_id = 12345;"
++            ]
+         }
+-    ]
+-}
+\ No newline at end of file
++    ],
++    "metadata": {
++        "kernelspec": {
++            "display_name": "SQL",
++            "language": "sql",
++            "name": "SQL"
++        },
++        "language_info": {
++            "name": "sql",
++            "version": ""
++        }
++    },
++    "nbformat": 4,
++    "nbformat_minor": 2
++}
+diff --git a/sql-part-3/studio/SQL-Part-3-Studio.ipynb b/sql-part-3/studio/SQL-Part-3-Studio.ipynb
+index eea5af3..0fc0784 100644
+--- a/sql-part-3/studio/SQL-Part-3-Studio.ipynb
++++ b/sql-part-3/studio/SQL-Part-3-Studio.ipynb
+@@ -50,7 +50,15 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Solution"
++    "-- Solutionselect t.tag_id,count(*)'tag id count',tag_name from BooksDB.dbo.book_tags bt Full join BooksDB.dbo.tags t \n",
++    "\n",
++    "\n",
++    "select t.tag_id,count(*)'tag id count',tag_name from BooksDB.dbo.book_tags bt Full join BooksDB.dbo.tags t \n",
++    "on bt.tag_id=t.tag_id\n",
++    "group by t.tag_id,tag_name\n",
++    "having t.tag_name like '%Woman%'\n",
++    "order by [tag id count] desc\n",
++    "\n"
+    ]
+   },
+   {
+@@ -72,7 +80,9 @@
+    },
+    "outputs": [],
+    "source": [
+-    "-- Solution"
++    "select authors,title,average_rating,tag_id  from BooksDB.dbo.books b Full join BooksDB.dbo.book_tags bt\n",
++    "on b.book_id= bt.goodreads_book_id where tag_id =32681\n",
++    "order by tag_id,average_rating desc;"
+    ]
+   },
+   {
+diff --git a/sql-part-4/exercises/SQL-Part-4-Exercises.ipynb b/sql-part-4/exercises/SQL-Part-4-Exercises.ipynb
+index 5e3c18e..02f057d 100644
+--- a/sql-part-4/exercises/SQL-Part-4-Exercises.ipynb
++++ b/sql-part-4/exercises/SQL-Part-4-Exercises.ipynb
+@@ -1,203 +1,229 @@
+ {
+-    "metadata": {
+-        "kernelspec": {
+-            "name": "SQL",
+-            "display_name": "SQL",
+-            "language": "sql"
+-        },
+-        "language_info": {
+-            "name": "sql",
+-            "version": ""
+-        }
+-    },
+-    "nbformat_minor": 2,
+-    "nbformat": 4,
+     "cells": [
+         {
++            "attachments": {},
+             "cell_type": "markdown",
++            "metadata": {
++                "azdata_cell_guid": "10006a10-882f-4f55-8d42-f36044fdb6c7"
++            },
+             "source": [
+                 "# Exercises: Complex queries\n",
+                 "\n",
+                 "For the exercises, you are tasked with writing five queries that will help you delve deeper into BooksDB. You can choose whether you want to use a correlated subquery, a nested subquery, the UNION operator, the INTERSECT operator, or the EXCEPT operator for each one. You may not use joins or add multiple statements to the WHERE clause.\n",
+                 "\n",
+                 "1. Write a query that will return the number of users who rated a book above it's average rating."
+-            ],
+-            "metadata": {
+-                "azdata_cell_guid": "10006a10-882f-4f55-8d42-f36044fdb6c7"
+-            },
+-            "attachments": {}
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "203eb95e-6585-435f-8a8e-bfa0dfe6f7c0",
+-                "tags": []
+-            },
+-            "outputs": [
+-                {
+-                    "output_type": "display_data",
+-                    "data": {
+-                        "text/html": "Commands completed successfully."
+-                    },
+-                    "metadata": {}
+-                },
+-                {
+-                    "output_type": "display_data",
+-                    "data": {
+-                        "text/html": "Total execution time: 00:00:00"
+-                    },
+-                    "metadata": {}
++                "tags": [],
++                "vscode": {
++                    "languageId": "sql"
+                 }
+-            ],
+-            "execution_count": 1
++            },
++            "outputs": [],
++            "source": [
++                "select count(user_id) 'number_of_users',rating from BooksDB.dbo.ratings where rating > \n",
++                "all (select avg(rating) from BooksDB.dbo.ratings) group by user_id,rating order by number_of_users desc;"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "2. Write a query that returns the book ids of all books that have over 1000 ratings of 1 star or over 1000 ratings of 5 stars."
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "7f849931-6c9c-4cd9-b3ba-66871052673d"
+             },
+-            "attachments": {}
++            "source": [
++                "2. Write a query that returns the book ids of all books that have over 1000 ratings of 1 star or over 1000 ratings of 5 stars."
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "azdata_cell_guid": "bce732e3-1590-457b-b1f9-5319345ff790"
++                "azdata_cell_guid": "bce732e3-1590-457b-b1f9-5319345ff790",
++                "vscode": {
++                    "languageId": "sql"
++                }
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 2
++            "source": [
++                "select book_id,ratings_1,ratings_5 from BooksDB.dbo.books  where book_id=ANY (select book_id from BooksDB.dbo.books where ratings_1>1000 or ratings_5>1000);"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "3. Write a query that returns the book ids of all books that have over 1000 ratings of 1 star and over 1000 ratings of 5 stars."
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "9c53b866-c8e8-465e-b089-7702b191a15e"
+             },
+-            "attachments": {}
++            "source": [
++                "3. Write a query that returns the book ids of all books that have over 1000 ratings of 1 star and over 1000 ratings of 5 stars."
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "azdata_cell_guid": "43e39973-5a29-45ff-b2a9-9c658a19c296"
++                "azdata_cell_guid": "43e39973-5a29-45ff-b2a9-9c658a19c296",
++                "vscode": {
++                    "languageId": "sql"
++                }
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 3
++            "source": [
++                "select book_id,ratings_1,ratings_5 from BooksDB.dbo.books  where book_id=ANY (select book_id from BooksDB.dbo.books where ratings_1>1000 or ratings_5>1000"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "4. Write a query that returns the book ids of books that have a language code of \"en-US\" and not a langugae code of \"en-GB\"."
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "2bd4844b-83af-490f-97cd-fdc1fa2944ec"
+             },
+-            "attachments": {}
++            "source": [
++                "4. Write a query that returns the book ids of books that have a language code of \"en-US\" and not a langugae code of \"en-GB\"."
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+-                "azdata_cell_guid": "ba5a1b61-19c0-4d70-ae8d-2daae6ae1e21"
++                "azdata_cell_guid": "ba5a1b61-19c0-4d70-ae8d-2daae6ae1e21",
++                "vscode": {
++                    "languageId": "sql"
++                }
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 4
++            "source": [
++                "select book_id,language_code from BooksDB.dbo.books where book_id IN(select book_id from BooksDB.dbo.books where language_code ='en-US' and \n",
++                "language_code NOT IN('en-GB')) ORDER by book_id"
++            ]
+         },
+         {
++            "attachments": {},
+             "cell_type": "markdown",
+-            "source": [
+-                "5. Write a query that returns the names of the tags and the tag ids for tags that were used over 100,000 times for a book. "
+-            ],
+             "metadata": {
+                 "azdata_cell_guid": "6ddd588f-a84c-4c77-93ac-e8c8bd21d0f5"
+             },
+-            "attachments": {}
++            "source": [
++                "5. Write a query that returns the names of the tags and the tag ids for tags that were used over 100,000 times for a book. "
++            ]
+         },
+         {
+             "cell_type": "code",
+-            "source": [
+-                ""
+-            ],
++            "execution_count": null,
+             "metadata": {
+                 "azdata_cell_guid": "90f61ad7-65cb-4ea8-85a3-d8c815cfe347",
+-                "tags": []
++                "tags": [],
++                "vscode": {
++                    "languageId": "sql"
++                }
+             },
+             "outputs": [
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Commands completed successfully."
++                        "text/html": [
++                            "Commands completed successfully."
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 },
+                 {
+-                    "output_type": "display_data",
+                     "data": {
+-                        "text/html": "Total execution time: 00:00:00"
++                        "text/html": [
++                            "Total execution time: 00:00:00"
++                        ]
+                     },
+-                    "metadata": {}
++                    "metadata": {},
++                    "output_type": "display_data"
+                 }
+             ],
+-            "execution_count": 5
++            "source": [
++                "select tag_id,tag_name from BooksDB.dbo.tags where tag_id in (select tag_id from BooksDB.dbo.book_tags where count>100000);"
++            ]
+         }
+-    ]
+-}
+\ No newline at end of file
++    ],
++    "metadata": {
++        "kernelspec": {
++            "display_name": "base",
++            "language": "python",
++            "name": "python3"
++        },
++        "language_info": {
++            "codemirror_mode": {
++                "name": "ipython",
++                "version": 3
++            },
++            "file_extension": ".py",
++            "mimetype": "text/x-python",
++            "name": "python",
++            "nbconvert_exporter": "python",
++            "pygments_lexer": "ipython3",
++            "version": "3.13.5"
++        }
++    },
++    "nbformat": 4,
++    "nbformat_minor": 2
++}
